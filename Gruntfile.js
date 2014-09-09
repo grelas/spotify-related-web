@@ -11,12 +11,34 @@ module.exports = function(grunt) {
 	        keepalive: true
 	      }
 	    }
-	  }
+	  },
+
+    sass: {
+      dist: {
+        files: [{
+          expand: true,
+          cwd: 'css',
+          src: ['*.scss'],
+          dest: 'build/css',
+          ext: '.css'
+        }]
+      }
+    },
+
+    watch: {
+      css: {
+        files: '**/*.scss',
+        tasks: ['sass'],
+        options: {
+          livereload: true,
+        },
+      },
+    },
 
   });
 
   require('load-grunt-tasks')(grunt);
 
   // Default task(s).
-  grunt.registerTask('default', ['task1']);
+  grunt.registerTask('default', ['sass']);
 };
