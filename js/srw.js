@@ -6,7 +6,8 @@
 
  	// store config 
  	var configMap = {
- 		api_base: 'https://api.spotify.com/v1'
+ 		api_base: 'https://api.spotify.com/v1',
+ 		genre_limit: 5
  	},
 
  	// store state
@@ -148,15 +149,13 @@
  			success: function( response ) {
  				var resp = response,
  					related_artists_arr = resp.artists,
- 					related_artists_len = related_artists_arr.length;
+ 					related_artists_len = related_artists_arr.length,
+ 					i;
 
  				console.dir( related_artists_arr );
 
- 				for( var i = 0; i < related_artists_len; i++ ) {
- 					//console.log( related_artists_arr[ i ].name );
- 					//jq.$related_artists.append( '<p>' + (i + 1) + ': ' + related_artists_arr[ i ].name + '</p>' );
-
- 					fetchTopTracks( related_artists_arr[ i ].id );
+ 				for( i = 0; i < related_artists_len; i++ ) {
+ 					fetchTopTracks( related_artists_arr[ i ].id, related_artists_arr[ i ].genres );
  				}
 
  				if( callback && typeof callback === "function" ) {
@@ -166,7 +165,8 @@
  		});
  	};
 
- 	fetchTopTracks = function( artistId ){
+ 	fetchTopTracks = function( artistId, genreArr ){
+
  		$.ajax({
  			url: configMap.api_base + '/artists/' + artistId + '/top-tracks?country=US',
 
@@ -174,9 +174,27 @@
  				var resp = response,
  					tracks = resp.tracks,
  					tracks_len = tracks.length,
+ 					genre_arr_list,
  					i;
 
- 				jq.$top_related_tracks.append( '<li><strong>' + tracks[0].name + '</strong> <span><em>(' + tracks[0].artists[0].name + ')</em></span></li>' );
+ 					console.log( 'genre count: ' + genreArr.length );
+
+ 					if( genreArr.length > 0 ) {
+
+ 						if( genreArr.length > configMap.genre_limit ) {
+
+ 							// remove other genres
+ 							genreArr.splice( genreArr[configMap.genre_limit], (genreArr.length - configMap.genre_limit) );
+ 
+ 						}
+
+ 						genre_arr_list = genreArr.toString();
+ 						console.log( genreArr );
+ 					}
+ 					
+
+ 				jq.$top_related_tracks
+ 					.append( '<li><strong>' + tracks[0].name + '</strong> <span><em>(' + tracks[ 0 ].artists[ 0 ].name + ')</em></span><span>' + genre_arr_list + '</span></li>' );
  			}
  		});
  	};
