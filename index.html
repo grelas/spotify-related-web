@@ -2,16 +2,25 @@
 <html>
 <head>
 		<title>Spotify Related Web</title>
-		<link rel="stylesheet" href="css/app.css">
+		<link rel="stylesheet" href="build/css/app.css">
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 		<script type="text/javascript" src="js/srw.js"></script>
 </head>
 <body>
 	<div class="srw">
-    <h1>Get related artists from: <span class="artist"></span></h1>
-    <div class="artist-img"></div>
-    <div class="related-artists"></div>
-    <ul class="top-related-tracks"></ul>
+		<div class="container">
+			<h1>Get related artists from: <span class="artist"></span></h1>
+			<form class="search-form">
+	        <input type="text" id="query" value="Circa Survive" class="form-control" placeholder="Enter artist" />
+	        <input type="submit" id="search" class="btn btn-primary" value="Search" />
+	    </form>
+	    <div class="results">
+		    
+		    <div class="artist-img"></div>
+		    <div class="related-artists"></div>
+		    <ul class="top-related-tracks"></ul>
+		  </div>
+		</div>
   </div>
 </body>
 </html>
