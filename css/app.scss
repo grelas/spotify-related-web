@@ -1,3 +1,5 @@
+@import "normalize";
+
 * {
 	box-sizing: border-box;
 }
@@ -6,6 +8,14 @@ body {
   font: 100%/1.5 "Helvetica", Arial, sans-serif;
   background: #fff;
   color: #000;
+}
+
+.container {
+  max-width: 1400px;
+  width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin: 0 auto;
 }
 
 img {
