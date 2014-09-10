@@ -38,7 +38,8 @@
  			$results_container:  $('.results'),
  			$search_form: 			 $('.search-form'),
  			$search_btn: 				 $('#search'),
- 			$query: 						 $('#query')
+ 			$query: 						 $('#query'),
+ 			$message: 					 $('.message')
  		};
  	};
 
@@ -62,6 +63,7 @@
         		artist_uri = artists.items[ 0 ].id;
         	} else {
         		console.warn( ' -- No results from search' );
+        		jq.$message.html('No results');
         	}
 
 
@@ -174,22 +176,25 @@
  				var resp = response,
  					tracks = resp.tracks,
  					tracks_len = tracks.length,
+ 					genre_arr_len = genreArr.length,
  					genre_arr_list,
  					i;
 
- 					console.log( 'genre count: ' + genreArr.length );
+ 					console.log( 'genre count: ' + genre_arr_len );
 
- 					if( genreArr.length > 0 ) {
+ 					if( genre_arr_len > 0 ) {
 
- 						if( genreArr.length > configMap.genre_limit ) {
+ 						if( genre_arr_len > configMap.genre_limit ) {
 
  							// remove other genres
- 							genreArr.splice( genreArr[configMap.genre_limit], (genreArr.length - configMap.genre_limit) );
+ 							genreArr.splice( genreArr[configMap.genre_limit], (genre_arr_len - configMap.genre_limit) );
  
  						}
 
  						genre_arr_list = genreArr.toString();
  						console.log( genreArr );
+ 					} else {
+ 						genre_arr_list = "No Genres";
  					}
  					
 
@@ -201,7 +206,7 @@
 
  	clearResults = function(){
  		console.log(' -- Clear dom results' );
-
+ 		jq.$message.empty();
  		jq.$top_related_tracks.empty();
  	};
 
