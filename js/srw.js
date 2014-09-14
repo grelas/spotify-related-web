@@ -44,6 +44,7 @@
  			$search_btn: 				 $('#search'),
  			$query: 						 $('#query'),
  			$message: 					 $('.message'),
+ 			$loading: 					 $('.loading')
  		};
  	};
 
@@ -96,6 +97,8 @@
  		}
 
  		console.dir(tracks);
+ 		console.log( ' -- Hide loading gif' );
+ 		jq.$loading.hide();
 
  		jq.$top_related_tracks.append( template( tracks ) );
 
@@ -107,12 +110,11 @@
 			jq.$query.val( new_search );
 			startRelatedTracks( new_search );
 		});
-
-
  	};
 
  	startRelatedTracks = function( artistId ){
  		clearResults();
+ 		jq.$loading.show();
 
  		var search = searchArtists( artistId );
 
@@ -124,10 +126,10 @@
 
  				searched_artist_id = results.artists.items[ 0 ].id;
 
- 				if( cache[artistId] ) {
+ 				if( cache[ artistId ] ) {
 	 				console.log( ' -- Already cached that artist' );
 
-					displayTracks( cache[artistId] );
+					displayTracks( cache[ artistId ] );
 
 				} else {
 					console.log( ' -- Not cached, execute api calls' );
@@ -136,13 +138,20 @@
 	 				related_artists.done( function( results ){
 	 					var dfds = [], i;
 
+	 					console.log( results );
+
+	 					var genre_arr = [];
+
 	 					for( i = 0; i < results.artists.length; i++ ) {
 	 						dfds.push( fetchTopTracks( results.artists[ i ].id ) );
+	 						genre_arr.push( results.artists[ i ].genres );
 	 					}
 
+	 					//console.log( genre_arr );
+
 	 					$.when.apply( $, dfds ).done(function(){
-	 						displayTracks( arguments );
 	 						cache[ artistId ] = arguments;
+	 						displayTracks( arguments );
 	 						console.log( cache );
 	 					});
 
@@ -153,7 +162,6 @@
  				console.log(' -- No artists found ' );
  			}
  		});
-
  	};
 
  	initModule = function( $container ) {
@@ -162,14 +170,24 @@
  		stateMap.$container = $container;
  		setJqueryMap();
 
+ 		jq.$loading.hide();
+
 		jq.$search_btn.on('click', function( e ){
 			console.log(' -- User clicked search' );
 			e.preventDefault();
 			
 			var cur_value = jq.$query.val();
 
-			startRelatedTracks( cur_value );
+			console.log(' -- Show loading gif' );
 
+			startRelatedTracks( cur_value );
+		});
+
+		Handlebars.registerHelper("formatDuration", function( duration_ms ){
+		  var minutes = Math.floor(duration_ms / 60000),
+		  		seconds = ((duration_ms % 60000) / 1000).toFixed(0);
+
+		  return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
 		});
 
  	};

@@ -6,6 +6,7 @@
 </head>
 <body>
 	<div class="srw">
+		<div class="loading">Loading...</div>
 		<div class="container">
 			<h1>Get top related artist tracks from: <span class="artist"></span></h1>
 			<form class="search-form">
@@ -16,6 +17,7 @@
 				<script id="results-template" type="text/x-handlebars-template">
 					{{#each this}}
 					<li class="track">
+						<img class="track__img" src="{{ album.images.0.url }}" alt="{{ album.name }}" />
 						<div class="track__name">
 							<a href="{{ external_urls.spotify }}" target="_blank">{{ name }}</a>
 						</div>
@@ -25,7 +27,7 @@
 						<div class="track__preview">
 							<a href="{{ preview_url }}" target="_blank">Preview</a>
 						</div>
-						<div class="track__duration">Duration: {{ duration_ms }}</div>
+						<div class="track__duration">Duration: {{ formatDuration duration_ms }}</div>
 					</li>
 					{{/each}}
 				</script>
