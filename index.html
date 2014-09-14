@@ -3,24 +3,36 @@
 <head>
 		<title>Spotify Related Web</title>
 		<link rel="stylesheet" href="build/css/app.css">
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script type="text/javascript" src="js/srw.js"></script>
 </head>
 <body>
 	<div class="srw">
 		<div class="container">
-			<h1>Get related artists from: <span class="artist"></span></h1>
+			<h1>Get top related artist tracks from: <span class="artist"></span></h1>
 			<form class="search-form">
-	        <input type="text" id="query" value="Beach House" class="form-control" placeholder="Enter artist" />
+	        <input type="text" id="query" value="Circa Survive" class="form-control" placeholder="Enter artist" />
 	        <input type="submit" id="search" class="btn btn-primary" value="Search" />
 	    </form>
-	    <div class="results">
-	    	<div class="message"></div>
-		    <div class="artist-img"></div>
-		    <div class="related-artists"></div>
-		    <ul class="top-related-tracks"></ul>
-		  </div>
-		</div>
+			<ul class="top-related-tracks">
+				<script id="results-template" type="text/x-handlebars-template">
+					{{#each this}}
+					<li class="track">
+						<div class="track__name">
+							<a href="{{ external_urls.spotify }}" target="_blank">{{ name }}</a>
+						</div>
+						<div class="track__artist">Artist Name: {{ artists.0.name }}
+							<button class="btn js-new-search" type="button" data-artist-name="{{ artists.0.name }}">Use this artist as search</button></div>
+						<div class="track__id">ID: {{ id }}</div>
+						<div class="track__preview">
+							<a href="{{ preview_url }}" target="_blank">Preview</a>
+						</div>
+						<div class="track__duration">Duration: {{ duration_ms }}</div>
+					</li>
+					{{/each}}
+				</script>
+			</ul>
   </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="js/handlebars-v2.0.0.js"></script>
+  <script type="text/javascript" src="js/srw.js"></script>
 </body>
 </html>
