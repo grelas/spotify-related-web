@@ -9,9 +9,9 @@
 		<div class="loading">Loading...</div>
 		<div class="container">
 			<h1>Get top related artist tracks from: <span class="artist"></span></h1>
-			<form class="search-form">
-	        <input type="text" id="query" value="Circa Survive" class="form-control" placeholder="Enter artist" />
-	        <input type="submit" id="search" class="btn btn-primary" value="Search" />
+			<form class="search-form form-inline">
+	        <input type="text" class="form-control" id="query" value="Circa Survive" class="form-control" placeholder="Enter artist" />
+	        <button type="submit" id="search" class="btn">Search</button>
 	    </form>
 			<ul class="top-related-tracks">
 				<script id="results-template" type="text/x-handlebars-template">
@@ -21,13 +21,22 @@
 						<div class="track__name">
 							<a href="{{ external_urls.spotify }}" target="_blank">{{ name }}</a>
 						</div>
-						<div class="track__artist">Artist Name: {{ artists.0.name }}
-							<button class="btn js-new-search" type="button" data-artist-name="{{ artists.0.name }}">Use this artist as search</button></div>
-						<div class="track__id">ID: {{ id }}</div>
-						<div class="track__preview">
-							<a href="{{ preview_url }}" target="_blank">Preview</a>
+						<div class="track__artist">
+							<span class="label">Artist Name:</span> {{ artists.0.name }}
+							<button class="btn btn--newsearch js-new-search" type="button" data-artist-name="{{ artists.0.name }}">Use this artist as search</button></div>
+
+						{{!--
+						<div class="track__id">
+							<span class="label">ID:</span> {{ id }}
 						</div>
-						<div class="track__duration">Duration: {{ formatDuration duration_ms }}</div>
+						<div class="track__preview">
+						<a href="{{ preview_url }}" target="_blank">Preview</a>
+						</div>
+						--}}
+
+						<div class="track__duration">
+							<span class="label">Duration:</span> {{ formatDuration duration_ms }}
+						</div>
 					</li>
 					{{/each}}
 				</script>

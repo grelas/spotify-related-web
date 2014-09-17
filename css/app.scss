@@ -1,21 +1,117 @@
 @import "normalize";
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700);
+@import "_mixins";
+
+$color-green:  #3A8DB3;
+$color-blue:   #5F90C0;
+$color-purple: #6064ad;
+$color-text:   #313140;
+
+/* Helpers */
+
+.cf {
+  &:before,
+  &:after {
+    content: " "; 
+    display: table; 
+  }
+
+  &:after {
+    clear: both;
+  }
+
+  *zoom: 1;
+}
+
+/* Base */
 
 * {
-	box-sizing: border-box;
+	@include box-sizing( border-box );
 }
 
 body {
-  font: 100%/1.5 "Helvetica", Arial, sans-serif;
-  background: #fff;
-  color: #000;
+  font: 100%/1.5 "Source Sans Pro", "Helvetica", Arial, sans-serif;
+  background: #f9f9f9;
+  color: $color-text;
 }
 
-.container {
-  max-width: 1400px;
+.btn {
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap;
+  cursor: pointer;
+  margin: 0;
+  height: 50px;
+  padding: 0 1em;
+  border-radius: 2px;
+  border: 2px solid $color-purple;
+  color: $color-purple;
+  text-align: center;
+  background-color: transparent;
+  transition: all 350ms ease;
+
+  &,
+  &:hover {
+    text-decoration: none;
+  }
+
+  &:hover {
+    border-color: darken( $color-purple, 10% );
+    color: darken( $color-purple, 10% );
+  }
+
+  &:active,
+  &:focus {
+    outline: none;
+  }
+}
+
+.btn--white {
+  border-color: #fff;
+  color: #fff;
+}
+
+.form-control {
+  display: block;
   width: 100%;
-  padding-left: 20px;
-  padding-right: 20px;
-  margin: 0 auto;
+  height: 50px;
+  padding: 10px 20px;
+  //font-size: $font-size-base;
+  //line-height: $line-height-base;
+  //color: #000;
+  background-color: transparent;
+  background-image: none;
+  border: 2px solid #ddd;
+  border-radius: 2px;
+  transition: border 350ms ease;
+
+  &:active,
+  &:focus {
+    outline: 0;
+    border-color: darken( #ddd, 10% );
+  }
+}
+
+.form-control--dark {
+  border-color: darken( $color-purple, 10% );
+}
+
+.form-inline {
+  .form-control {
+    display: inline-block;
+    width: auto; 
+    vertical-align: middle;
+  }
+}
+
+a {
+  color: $color-text;
+  text-decoration: none;
+  transition: color 350ms ease;
+
+  &:hover {
+    color: $color-purple;
+  }
 }
 
 img {
@@ -25,24 +121,43 @@ img {
   height: auto;
 }
 
+/* Main */
+
+.container {
+  max-width: 1400px;
+  width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin: 0 auto;
+}
+
 .top-related-tracks {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.top-related-tracks li {
-  padding: 20px;
-  background: #fff;
-  border-bottom: 1px solid rgba(0,0,0,.1);
-}
-
-.top-related-tracks li:nth-child( even ) {
-  background: rgba(0,0,0,.05)
+.btn--newsearch {
+  float: right;
 }
 
 .artist-img {
   width: 100px;
+}
+
+.track {
+  @extend .cf;
+  color: #666;
+  padding: 30px;
+  background-color: #fff;
+  margin-bottom: 8px;
+  border-radius: 3px;
+}
+
+.track__name {
+  font-weight: 600;
+  color: #313140;
+  font-size: 20px;
 }
 
 .track__img {
@@ -50,5 +165,36 @@ img {
   width: 100px;
   height: 100px;
   margin-right: 20px;
+  border-radius: 4px;
+}
+
+.label {
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: .5rem;
+  font-size: 13px;
+}
+
+.search-form {
+  background-color: #fff;
   margin-bottom: 20px;
+  padding: 30px;
+  border-radius: 3px;
+
+  // .form-control {
+  //   @extend .form-control--dark;
+  //   width: 75%;
+  // }
+
+  // .btn {
+  //   float: right;
+  //   width: 20%;
+  // }
+}
+
+.loading {
+  position: fixed;
+  top: 0;
+  right: 0;
 }
