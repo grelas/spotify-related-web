@@ -113,26 +113,29 @@
  	};
 
  	startRelatedTracks = function( artistId ){
- 		clearResults();
+ 		
  		jq.$loading.show();
+ 		jq.$artist.text( artistId );
 
  		var search = searchArtists( artistId );
 
  		search.done( function( results ){
  			var searched_artist_id;
 
- 			if( results.artists.items.length > 0 ) {
- 				console.log(' -- Artists founds' );
+ 			clearResults();
 
- 				searched_artist_id = results.artists.items[ 0 ].id;
+ 			if( cache[ artistId ] ) {
+ 				console.log( ' -- Already cached that artist' );
 
- 				if( cache[ artistId ] ) {
-	 				console.log( ' -- Already cached that artist' );
+				displayTracks( cache[ artistId ] );
 
-					displayTracks( cache[ artistId ] );
+ 			} else {
 
-				} else {
-					console.log( ' -- Not cached, execute api calls' );
+ 				if( results.artists.items.length > 0 ) {
+ 					console.log(' -- Artists founds' );
+
+ 					searched_artist_id = results.artists.items[ 0 ].id;
+ 					console.log( ' -- Not cached, execute api calls' );
 	 				var related_artists = fetchRelatedArtists( searched_artist_id );
 
 	 				related_artists.done( function( results ){
@@ -140,11 +143,11 @@
 
 	 					console.log( results );
 
-	 					var genre_arr = [];
+	 					//var genre_arr = [];
 
 	 					for( i = 0; i < results.artists.length; i++ ) {
 	 						dfds.push( fetchTopTracks( results.artists[ i ].id ) );
-	 						genre_arr.push( results.artists[ i ].genres );
+	 						//genre_arr.push( results.artists[ i ].genres );
 	 					}
 
 	 					//console.log( genre_arr );
@@ -156,11 +159,11 @@
 	 					});
 
 	 				});
-		 		}
-
- 			} else {
- 				console.log(' -- No artists found ' );
+ 				} else {
+ 					console.log(' -- No artists found ' );
+ 				}
  			}
+
  		});
  	};
 
@@ -177,9 +180,6 @@
 			e.preventDefault();
 			
 			var cur_value = jq.$query.val();
-
-			console.log(' -- Show loading gif' );
-
 			startRelatedTracks( cur_value );
 		});
 
