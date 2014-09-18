@@ -118,7 +118,7 @@
 	 		.each( function( i ){
 	 			var $self = $(this);
 	 			$self.wait( ( i++ ) * configMap.fade_delay, function() {
-					$self.addClass( 'fadeInDown' );
+					$self.addClass( 'bounceInUp' );
 				});
 	 		});
 	 		
