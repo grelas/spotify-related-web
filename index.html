@@ -10,20 +10,24 @@
 		<div class="container">
 			<h1>Get top related artist tracks from: <span class="artist"></span></h1>
 			<form class="search-form form-inline">
-	        <input type="text" class="form-control" id="query" value="Circa Survive" class="form-control" placeholder="Enter artist" />
-	        <button type="submit" id="search" class="btn">Search</button>
+	      <input type="text" class="form-control" value="Circa Survive" class="form-control" placeholder="Enter artist" />
+	      <button type="submit" class="btn js-search">Search</button>
 	    </form>
 			<ul class="top-related-tracks">
 				<script id="results-template" type="text/x-handlebars-template">
 					{{#each this}}
 					<li class="track">
+
+						{{#if album.images.0.url}}
 						<img class="track__img" src="{{ album.images.0.url }}" alt="{{ album.name }}" />
+						{{/if}}
+
 						<div class="track__name">
 							<a href="{{ external_urls.spotify }}" target="_blank">{{ name }}</a>
 						</div>
 						<div class="track__artist">
 							<span class="label">Artist Name:</span> {{ artists.0.name }}
-							<button class="btn btn--newsearch js-new-search" type="button" data-artist-name="{{ artists.0.name }}">Use this artist as search</button></div>
+						</div>
 
 						{{!--
 						<div class="track__id">
@@ -37,6 +41,14 @@
 						<div class="track__duration">
 							<span class="label">Duration:</span> {{ formatDuration duration_ms }}
 						</div>
+
+						{{#if genres}}
+						<div class="track__genre">
+							<span class="label">Genres:</span> {{ genres }}
+						</div>
+						{{/if}}
+
+						<button class="btn btn--newsearch js-new-search" type="button" data-artist-name="{{ artists.0.name }}">Relay Artist</button>
 					</li>
 					{{/each}}
 				</script>
