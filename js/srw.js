@@ -41,8 +41,8 @@
  			$top_related_tracks: $('.top-related-tracks'),
  			$results_container:  $('.results'),
  			$search_form: 			 $('.search-form'),
- 			$search_btn: 				 $('#search'),
- 			$query: 						 $('#query'),
+ 			$search_btn: 				 $('.js-search'),
+ 			$query: 						 $('.search-form .form-control'),
  			$message: 					 $('.message'),
  			$loading: 					 $('.loading')
  		};
@@ -56,7 +56,7 @@
  			data: {
  				q: query,
  				type: 'artist',
- 				limit: 30
+ 				limit: 10
  			},
  		}).promise();
 
@@ -72,7 +72,6 @@
  	};
 
  	fetchTopTracks = function( artistId ){
- 		//console.log( ' -- Fetch top tracks from artistId ' );
 
  		return $.ajax({
  			url: configMap.api_base + '/artists/' + artistId + '/top-tracks?country=US',
@@ -86,25 +85,33 @@
  		jq.$top_related_tracks.empty();
  	};
 
- 	displayTracks = function( data ){
+ 	displayTracks = function( data, genreData ){
  		console.log(' -- Insert tracks in DOM' );
- 		console.dir( data );
+ 		//console.dir( data );
 
- 		var tracks = [], i;
+ 		var tracks = [],
+ 				data_len = data.length,
+ 				i;
 
- 		for( i = 0; i < data.length; i++ ) {
+ 		for( i = 0; i < data_len; i++ ) {
  			tracks.push( data[i][0].tracks[0] );
+
+ 			// Need to add "genres" since the top tracks api doesn't include it
+ 			tracks[ i ][ "genres" ] = genreData[ i ];
  		}
 
- 		console.dir(tracks);
+ 		//console.log( tracks );
+
  		console.log( ' -- Hide loading gif' );
  		jq.$loading.hide();
 
+ 		console.log( ' -- Append tracks to handlebars template.' );
  		jq.$top_related_tracks.append( template( tracks ) );
 
+ 		console.log( ' -- Bind click handler to new search btn.' );
  		$('.js-new-search').on('click', function(){
 			var new_search = $(this).data('artist-name');
-			console.log(' -- New search: ' + new_search);
+			console.log( ' -- New search: ' + new_search );
 
 			// update val in search
 			jq.$query.val( new_search );
@@ -113,7 +120,7 @@
  	};
 
  	startRelatedTracks = function( artistId ){
- 		
+
  		jq.$loading.show();
  		jq.$artist.text( artistId );
 
@@ -127,7 +134,7 @@
  			if( cache[ artistId ] ) {
  				console.log( ' -- Already cached that artist' );
 
-				displayTracks( cache[ artistId ] );
+				displayTracks( cache[ artistId ], cache[ artistId ].genres );
 
  			} else {
 
@@ -135,27 +142,36 @@
  					console.log(' -- Artists founds' );
 
  					searched_artist_id = results.artists.items[ 0 ].id;
+
  					console.log( ' -- Not cached, execute api calls' );
 	 				var related_artists = fetchRelatedArtists( searched_artist_id );
 
 	 				related_artists.done( function( results ){
-	 					var dfds = [], i;
+	 					var dfds = [],
+	 							artists_arr = results.artists, 
+	 							artists_len = artists_arr.length,
+	 							genres = artists_arr.genres,
+	 							genres_arr = [],
+	 							i;
 
-	 					console.log( results );
-
-	 					//var genre_arr = [];
-
-	 					for( i = 0; i < results.artists.length; i++ ) {
-	 						dfds.push( fetchTopTracks( results.artists[ i ].id ) );
-	 						//genre_arr.push( results.artists[ i ].genres );
+	 					for( i = 0; i < artists_len; i++ ) {
+	 						dfds.push( fetchTopTracks( artists_arr[ i ].id ) );
+	 						genres_arr.push( results.artists[ i ].genres );
 	 					}
-
-	 					//console.log( genre_arr );
-
+	 					
+	 					
 	 					$.when.apply( $, dfds ).done(function(){
+	 						
+	 						// Add that search to the cache
 	 						cache[ artistId ] = arguments;
-	 						displayTracks( arguments );
+	 						cache[ artistId ]["genres"] = genres_arr;
+
+	 						// Display the tracks
+	 						displayTracks( arguments, genres_arr );
+
+	 						console.log( 'CACHE' );
 	 						console.log( cache );
+	 						
 	 					});
 
 	 				});
