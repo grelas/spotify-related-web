@@ -8,15 +8,15 @@
 	<div class="srw">
 		<div class="loading">Loading...</div>
 		<div class="container">
-			<h1>Get top related artist tracks from: <span class="artist"></span></h1>
+			<h1>Get top related artist tracks from: <span class="artist">Roisin Murphy</span></h1>
 			<form class="search-form form-inline">
-	      <input type="text" class="form-control" value="Circa Survive" class="form-control" placeholder="Enter artist" />
+	      <input type="text" class="form-control" value="Roisin Murphy" class="form-control" placeholder="Enter artist" />
 	      <button type="submit" class="btn js-search">Search</button>
 	    </form>
 			<ul class="top-related-tracks">
 				<script id="results-template" type="text/x-handlebars-template">
 					{{#each this}}
-					<li class="track">
+					<li class="track animated">
 
 						{{#if album.images.0.url}}
 						<img class="track__img" src="{{ album.images.0.url }}" alt="{{ album.name }}" />

@@ -3,12 +3,23 @@
  * Returns a list of an artist's top related artists' top tracks
  */
 
+ $.fn.wait = function( ms, callback ) {
+    return this.each(function() {
+        window.setTimeout((function( self ) {
+            return function() {
+                callback.call( self );
+            }
+        }( this )), ms );
+    });
+};
+
  var srw = (function(){
 
  	// store config 
  	var configMap = {
  		api_base: 'https://api.spotify.com/v1',
- 		genre_limit: 5
+ 		genre_limit: 5,
+ 		fade_delay: 50
  	},
 
  	// store state
@@ -87,26 +98,30 @@
 
  	displayTracks = function( data, genreData ){
  		console.log(' -- Insert tracks in DOM' );
- 		//console.dir( data );
 
  		var tracks = [],
  				data_len = data.length,
  				i;
 
  		for( i = 0; i < data_len; i++ ) {
- 			tracks.push( data[i][0].tracks[0] );
-
- 			// Need to add "genres" since the top tracks api doesn't include it
- 			tracks[ i ][ "genres" ] = genreData[ i ];
+			tracks.push( data[ i ][ 0 ].tracks[ 0 ] );
+			tracks[ i ][ "genres" ] = genreData[ i ];
  		}
-
- 		//console.log( tracks );
 
  		console.log( ' -- Hide loading gif' );
  		jq.$loading.hide();
 
  		console.log( ' -- Append tracks to handlebars template.' );
- 		jq.$top_related_tracks.append( template( tracks ) );
+ 		jq.$top_related_tracks
+	 		.append( template( tracks ) )
+	 		.find('.track')
+	 		.each( function( i ){
+	 			var $self = $(this);
+	 			$self.wait( ( i++ ) * configMap.fade_delay, function() {
+					$self.addClass( 'fadeInDown' );
+				});
+	 		});
+	 		
 
  		console.log( ' -- Bind click handler to new search btn.' );
  		$('.js-new-search').on('click', function(){
@@ -117,6 +132,7 @@
 			jq.$query.val( new_search );
 			startRelatedTracks( new_search );
 		});
+
  	};
 
  	startRelatedTracks = function( artistId ){
@@ -152,6 +168,7 @@
 	 							artists_len = artists_arr.length,
 	 							genres = artists_arr.genres,
 	 							genres_arr = [],
+	 							filteredTracks = [],
 	 							i;
 
 	 					for( i = 0; i < artists_len; i++ ) {
@@ -161,17 +178,29 @@
 	 					
 	 					
 	 					$.when.apply( $, dfds ).done(function(){
-	 						
-	 						// Add that search to the cache
-	 						cache[ artistId ] = arguments;
-	 						cache[ artistId ]["genres"] = genres_arr;
 
-	 						// Display the tracks
-	 						displayTracks( arguments, genres_arr );
+	 						// Returns a new array which has filtered
+	 						// out any artists with 0 tracks
+	 						// We must also remove the corresponding index
+	 						// from the genres_arr
+	 						filteredTracks = $.grep(arguments,function(val, idx){
+
+	 							if( val[0]['tracks'].length == 0 ) {
+	 								genres_arr.splice(idx,1);
+	 								return false;
+	 							}
+	 							return true;
+	 						});
+
+	 						displayTracks( filteredTracks, genres_arr );
+
+	 						// Add that search to the cache
+	 						cache[ artistId ] = filteredTracks;
+	 						cache[ artistId ]["genres"] = genres_arr;
 
 	 						console.log( 'CACHE' );
 	 						console.log( cache );
-	 						
+
 	 					});
 
 	 				});
@@ -212,6 +241,8 @@
  		initModule : initModule
  	};
  })();
+
+
 
  $(function(){
  	srw.initModule( $('.srw') );
