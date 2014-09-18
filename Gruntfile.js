@@ -13,11 +13,59 @@ module.exports = function(grunt) {
 	    }
 	  },
 
+    clean: {
+      build: {
+        src: ["build"]
+      },
+      sass: {
+        src: ["build/sass"]
+      }
+    },
+
+    copy: {
+      main: {
+        expand: true,
+        cwd: 'src/',
+        src: '**',
+        dest: 'build/'
+      },
+    },
+
+    uglify: {
+      options: {
+        compress: {
+          drop_console: true
+        }
+      },
+      my_target: {
+        files: {
+          'build/js/srw.js': ['src/js/srw.js']
+        }
+      }
+    },
+
     sass: {
-      dist: {
+      dev: {
+        options: {
+          sourcemap: 'none'
+        },
         files: [{
           expand: true,
-          cwd: 'css',
+          cwd: 'src/sass',
+          src: ['*.scss'],
+          dest: 'src/css',
+          ext: '.css'
+        }]
+      },
+
+      build: {
+        options: {
+          style: 'compressed',
+          sourcemap: 'none'
+        },
+        files: [{
+          expand: true,
+          cwd: 'build/sass',
           src: ['*.scss'],
           dest: 'build/css',
           ext: '.css'
@@ -41,4 +89,8 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', ['sass']);
+
+  // Build task(s).
+  grunt.registerTask('build', ['clean:build', 'copy', 'sass:build', 'uglify', 'clean:sass']);
+
 };
