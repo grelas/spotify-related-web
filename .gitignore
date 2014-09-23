@@ -1,6 +1,8 @@
 ## build folder
 build/
 
+.tmp
+
 ## node modules
 node_modules
 
