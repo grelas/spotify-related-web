@@ -465,9 +465,6 @@ img {
   -o-transition: opacity 350ms ease;
   transition: opacity 350ms ease; }
 
-.artist-img {
-  width: 100px; }
-
 .track {
   color: #666;
   padding: 30px;
@@ -490,8 +487,8 @@ img {
 
 .track__img {
   float: left;
-  width: 100px;
-  height: 100px;
+  width: 64px;
+  height: 64px;
   margin-right: 20px;
   border-radius: 4px; }
 
@@ -521,6 +518,15 @@ img {
   position: fixed;
   top: 0;
   right: 0; }
+
+.lazy {
+  opacity: 0;
+  -webkit-transition: opacity 350ms ease;
+  -o-transition: opacity 350ms ease;
+  transition: opacity 350ms ease; }
+
+.img--shown {
+  opacity: 1; }
 
 /* Animation */
 .animated {

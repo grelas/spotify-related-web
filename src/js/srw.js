@@ -3,36 +3,34 @@
  * Returns a list of an artist's top related artists' top tracks
  */
 
- $.fn.wait = function( ms, callback ) {
-    return this.each(function() {
-        window.setTimeout((function( self ) {
-            return function() {
-                callback.call( self );
-            }
-        }( this )), ms );
-    });
-};
-
  var srw = (function(){
 
  	// store config 
  	var configMap = {
- 		api_base: 'https://api.spotify.com/v1',
- 		genre_limit: 5,
- 		fade_delay: 50
+		api_base: 'https://api.spotify.com/v1',
+		default_search: 'Pixies',
+		fade_delay: 50,
+		anchor_schema_map : {
+			search : true
+		}
  	},
 
  	// store state
  	stateMap = {
- 		$container : null
+ 		$container : null,
+ 		cache      : {},
+ 		anchor_map : {} // Store the current anchor values in a map
  	},
 
- 	templateSource = $('#results-template').html(),
-  template = Handlebars.compile( templateSource ),
-  cache = {},
+	templateSource = $('#results-template').html(),
+	template = Handlebars.compile( templateSource ),
 
  	jq = {},
+ 	updateText,
  	setJqueryMap,
+ 	copyAnchorMap,
+ 	changeAnchorPart,
+ 	onHashchange,
  	searchArtists,
  	fetchTopTracks,
  	startRelatedTracks,
@@ -55,9 +53,148 @@
  			$search_btn: 				 $('.js-search'),
  			$query: 						 $('.search-form .form-control'),
  			$message: 					 $('.message'),
- 			$loading: 					 $('.loading')
+ 			$loading: 					 $('.loading'),
+ 			$lazy: 							 $('.lazy')
  		};
  	};
+
+ 	// Returns a copy of stored anchor map (minimizes overhead)
+ 	copyAnchorMap = function(){
+ 		return $.extend( true, {}, stateMap.anchor_map );
+ 	};
+
+ 	/*
+   * Utility to update the anchor
+ 	 * Purpose: Changes part of the URI anchor components
+   * Arguments: 
+   			* arg_map - The map describing what part of the URI anchor we want changed
+   * Returns
+   			* true - the Anchor portion of the URI was updated
+   			* false - the Anchor portion of the URI could not be updated
+   * Action
+       The current anchor rep stored in stateMap.anchor_map
+       This method
+           * Creates a copy of this map using copyAnchorMap()
+           * Modifies the key-values using arg_map
+           * Attempts to change the URI using uriAnchor
+           * Returns true on success, and false on failure.
+ 	*/
+ 	changeAnchorPart = function( arg_map ){
+ 		var anchor_map_revise = copyAnchorMap(),
+ 				bool_return = true,
+ 				key_name;
+
+ 		console.log('');
+		console.log('anchor stuff');
+
+		console.log( arg_map );
+ 		console.log( anchor_map_revise );
+ 		console.log( stateMap.anchor_map );
+
+ 		// Begin merge changes into anchor map
+ 		for( key_name in arg_map ){
+
+ 			if( arg_map.hasOwnProperty( key_name ) ) {
+
+ 			  // update independent key value
+ 				anchor_map_revise[ key_name ] = arg_map[ key_name ];
+
+ 				console.log( arg_map );
+ 				console.log( anchor_map_revise ); // has new value as 'search'
+ 				console.log( stateMap.anchor_map );
+
+ 			}
+ 		}
+
+ 		//attempt to update URI
+ 		try {
+ 			console.log('attempt to update URI');
+ 			$.uriAnchor.setAnchor( anchor_map_revise );
+
+ 		} catch( error ) {
+ 			console.log( error );
+
+ 			// replace URL with existing state
+ 			$.uriAnchor.setAnchor( stateMap.anchor_map, null, true );
+ 			bool_return = false;
+ 		}
+ 		console.log( 'bool_return: ' + bool_return );
+ 		console.log( 'end anchor stuff');
+ 		console.log( '' );
+ 		return bool_return;
+ 	};
+
+	/*
+   * Purpose: Handles the hashchange event
+   * Arguments
+   			* event - jQuery event object
+   * Action
+   			* Parses the URI anchor component
+   			* Comapres proposed application state with current
+   			* Adjust the application only where proposed state differs from existing
+	 */
+ 	onHashchange = function( event ){
+ 		var anchor_map_previous = copyAnchorMap(),
+ 				anchor_map_proposed,
+ 				_s_search_previous,
+ 				_s_search_proposed,
+ 				s_search_proposed;
+
+ 		console.log('');
+ 		console.log( 'ON HASHCHANGE' );
+ 		console.log( ' -- (initial) stateMap.anchor_map' );
+ 		console.log( stateMap.anchor_map );
+ 		console.log('');
+ 		console.log( ' -- anchor_map_previous' );
+ 		console.log( anchor_map_previous );
+ 		console.log('');
+
+ 		try {
+ 			anchor_map_proposed = $.uriAnchor.makeAnchorMap();
+ 			console.log(' -- Proposed anchor (what we want to search for)');
+ 			console.log( anchor_map_proposed );
+ 			console.log('');
+
+ 		} catch ( error ) {
+ 			console.log( error );
+ 			// set to previous
+
+ 			$.uriAnchor.setAnchor( anchor_map_previous, null, true );
+ 			return false;
+ 		}
+ 		// set the anchor_map to what we want to search for
+ 		stateMap.anchor_map = anchor_map_proposed;
+ 		console.log( '(after) stateMap.anchor_map' );
+ 		console.log( stateMap.anchor_map );
+ 		console.log('');
+
+ 		_s_search_previous = anchor_map_previous._s_search;
+ 		_s_search_proposed = anchor_map_proposed._s_search;
+
+ 		console.log( ' -- _s_search_previous: ' + _s_search_previous );
+ 		console.log( ' -- _s_search_proposed: ' + _s_search_proposed );
+
+
+ 		if( !anchor_map_previous || _s_search_previous !== _s_search_proposed ) {
+ 			s_search_proposed = anchor_map_proposed.search;
+ 			console.log( ' -- s_search_proposed: ' + s_search_proposed );
+
+ 			// perform search
+ 			console.log('')
+ 			console.log( 'PERFORM SEARCH FOR ' + s_search_proposed );
+ 			if( s_search_proposed !== '' ){
+ 				startRelatedTracks( s_search_proposed );
+ 			} else {
+ 				console.log('trying to search for blank')
+ 				$.uriAnchor.setAnchor({
+ 					search : configMap.default_search
+ 				});
+ 			}
+ 		}
+
+ 		return false;
+ 	};
+
 
  	searchArtists = function( query ){
  		console.log( ' -- Search spotify for artist ' + query );
@@ -120,25 +257,48 @@
 	 			$self.wait( ( i++ ) * configMap.fade_delay, function() {
 					$self.addClass( 'bounceInUp' );
 				});
+
+	 			console.log( ' -- Lazy load images' );
+				$self.find('img.lazy').unveil(100, function(){
+					var $img = $(this);
+					$img.load(function(){
+						$img.addClass('img--shown');
+					});
+				});
+
+				
 	 		});
-	 		
+	 	jq.$new_search = $('.js-new-search');
 
  		console.log( ' -- Bind click handler to new search btn.' );
- 		$('.js-new-search').on('click', function(){
+
+ 		jq.$new_search.on('click', function(){
 			var new_search = $(this).data('artist-name');
 			console.log( ' -- New search: ' + new_search );
 
-			// update val in search
-			jq.$query.val( new_search );
-			startRelatedTracks( new_search );
+			changeAnchorPart({
+				search : new_search
+			});
+
+			return false;
 		});
 
  	};
 
+ 	updateText = function( artist ) {
+ 		console.log( ' -- Update artist text' );
+
+ 		jq.$artist.text( artist );
+ 		jq.$query.val( artist );
+ 	};
+
  	startRelatedTracks = function( artistId ){
 
+ 		// show loading text
  		jq.$loading.show();
- 		jq.$artist.text( artistId );
+
+ 		// update text on screen
+ 		updateText( artistId );
 
  		var search = searchArtists( artistId );
 
@@ -147,15 +307,15 @@
 
  			clearResults();
 
- 			if( cache[ artistId ] ) {
+ 			if( stateMap.cache[ artistId ] ) {
  				console.log( ' -- Already cached that artist' );
 
-				displayTracks( cache[ artistId ], cache[ artistId ].genres );
+				displayTracks( stateMap.cache[ artistId ], stateMap.cache[ artistId ].genres );
 
  			} else {
 
  				if( results.artists.items.length > 0 ) {
- 					console.log(' -- Artists founds' );
+ 					console.log(' -- Artists found' );
 
  					searched_artist_id = results.artists.items[ 0 ].id;
 
@@ -195,17 +355,18 @@
 	 						displayTracks( filteredTracks, genres_arr );
 
 	 						// Add that search to the cache
-	 						cache[ artistId ] = filteredTracks;
-	 						cache[ artistId ]["genres"] = genres_arr;
+	 						stateMap.cache[ artistId ] = filteredTracks;
+	 						stateMap.cache[ artistId ]["genres"] = genres_arr;
 
-	 						console.log( 'CACHE' );
-	 						console.log( cache );
+	 						//console.log( 'CACHE' );
+	 						//console.log( stateMap.cache );
 
 	 					});
 
 	 				});
  				} else {
  					console.log(' -- No artists found ' );
+ 					return false;
  				}
  			}
 
@@ -213,19 +374,25 @@
  	};
 
  	initModule = function( $container ) {
- 		console.log('INIT MODULE');
+ 		console.log('INIT SRW');
 
  		stateMap.$container = $container;
  		setJqueryMap();
 
  		jq.$loading.hide();
 
+ 		console.log( ' -- Insert default search' );
+ 		updateText( configMap.default_search );
+
 		jq.$search_btn.on('click', function( e ){
 			console.log(' -- User clicked search' );
-			e.preventDefault();
-			
 			var cur_value = jq.$query.val();
-			startRelatedTracks( cur_value );
+
+			changeAnchorPart({
+				search : cur_value
+			});
+
+			return false;
 		});
 
 		Handlebars.registerHelper("formatDuration", function( duration_ms ){
@@ -235,13 +402,20 @@
 		  return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
 		});
 
+		$.uriAnchor.configModule({
+			schema_map : configMap.anchor_schema_map
+		});
+		// Bind the hashchange event handler and immediately trigger
+		// it so the module considers the bookmark on initial load
+		$(window)
+			.on( 'hashchange', onHashchange )
+			.trigger( 'hashchange' );
  	};
 
  	return {
  		initModule : initModule
  	};
  })();
-
 
 
  $(function(){
