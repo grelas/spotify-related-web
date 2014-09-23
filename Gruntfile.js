@@ -17,17 +17,27 @@ module.exports = function(grunt) {
       build: {
         src: ["build"]
       },
-      sass: {
-        src: ["build/sass"]
+    },
+
+    useminPrepare: {
+      html: 'src/index.html',
+      options: {
+        dest: 'build'
       }
+    },
+
+    usemin: {
+      html: ['build/index.html'] // html to update
     },
 
     copy: {
       main: {
-        expand: true,
-        cwd: 'src/',
-        src: '**',
-        dest: 'build/'
+        // expand: true,
+        // cwd: 'src/',
+        // src: '**',
+        // dest: 'build/'
+        src: 'src/index.html',
+        dest: 'build/index.html'
       },
     },
 
@@ -37,11 +47,6 @@ module.exports = function(grunt) {
           drop_console: true
         }
       },
-      my_target: {
-        files: {
-          'build/js/srw.js': ['src/js/srw.js']
-        }
-      }
     },
 
     sass: {
@@ -91,6 +96,6 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['sass']);
 
   // Build task(s).
-  grunt.registerTask('build', ['clean:build', 'copy', 'sass:build', 'uglify', 'clean:sass']);
+  grunt.registerTask('build', ['clean:build', 'copy:main', 'sass:build', 'useminPrepare', 'cssmin', 'concat', 'uglify', 'usemin']);
 
 };
